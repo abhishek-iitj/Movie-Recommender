@@ -10,7 +10,9 @@ def maxm(a, b):
     return b
 
 #similarity value between two item vectors
-def sim(item1, item2):
+def sim(itemx, itemy):
+    item1=itemx[:]
+    item2=itemy[:]
     userCount=len(item1)
     # print item1, item2
     sum1=0
@@ -41,11 +43,14 @@ def sim(item1, item2):
         fprod=1
     return (psum/fprod)
 
+def rmse(predictions, targets):
+    return math.sqrt(abs(predictions**2 - targets**2))
+
 fname="utility.txt"
 dataset=[]
 itemCount=0
 userCount=0
-start_time = time.time()
+
 
 with open(fname) as tsv:
     for line in csv.reader(tsv, dialect="excel-tab"):
@@ -74,60 +79,58 @@ for i in range(itemCount+1):
 print len(dataset)
 for i in range(len(dataset)-1):
     utilityMatrix[dataset[i][1]][dataset[i][0]]=dataset[i][2]
-#
+
+
 # for i in range(1, 11):
 #     for j in range(1, 11):
 #         print utilityMatrix[i][j],
 #     print "\n"
+while True:
+    start_time = time.time()
+    userx=random.randint(1,userCount)
+    print "random user : ", userx
+    itemx=[]
+    for j in  range(1, itemCount):
+        if utilityMatrix[j][userx]!=0:
+            itemx.append(j)
+    # print"Total non zero ratings, ", (len(itemx))
+    rand=random.randint(0, len(itemx)-1)
+    # print "pick , ", rand
+    itemx=itemx[rand]
+    original=utilityMatrix[itemx][userx]
 
-userx=random.randint(1,userCount)
-itemx=[]
-for j in (1, len(itemCount)):
-    if utilityMatrix[j][userx]!=0
-        itemx.append(j)
+    print "random (rated) movie : ", itemx
+    print "original rating : ", original
 
+    item_index = []
+    for i in range(1, itemCount+1):
+    	item_index.append(i)
+    # print item_index
 
-item_index = []
-for i in range(1, itemCount+1):
-	item_index.append(i)
-# print item_index
+    simArray=[]
+    # print utilityMatrix[itemx]
+    for i in range(1, itemCount+1):
+        simArray.append(sim(utilityMatrix[itemx], utilityMatrix[i]))
+    # print utilityMatrix[itemx]
+    print len(simArray)
 
-thefile = open('simArray.txt', 'w')
+    top_50 = [x for (y,x) in sorted(zip(simArray, item_index), key=lambda pair: pair[0], reverse=True)]
+    top_50 = top_50[:50]
 
-simArray=[]
-for i in range(1, itemCount+1):
-    simArray.append(sim(utilityMatrix[itemx], utilityMatrix[i]))
-print len(simArray)
-# weightedSimArray=[]
+    # print top_50
 
-# for i in range(0, len(simArray)):
-#     if i!=itemx:
-#         weightedSimArray.append(simArray[i]*utilityMatrix[i][userx])
-#     else:
-#         weightedSimArray.append(simArray[i])
+    weightedSum=0
+    denom=0
+    for i in range(0, len(top_50)):
+        weightedSum=weightedSum+(utilityMatrix[top_50[i]][userx]*simArray[top_50[i]])
+        multp=1
+        if utilityMatrix[top_50[i]][userx]==0:
+            multp=0
+        denom=denom+(simArray[top_50[i]]*multp)
 
-for x in simArray:
-  thefile.write("%s\n" % x)
-# print len(weightedSimArray)
+    predicted=Decimal(weightedSum/denom)
+    print "predicted rating : ", predicted
 
-# print weightedSimArray[0]
+    print "rmse : ", rmse((predicted), (original))
 
-
-top_50 = [x for (y,x) in sorted(zip(simArray, item_index), key=lambda pair: pair[0], reverse=True)]
-top_50 = top_50[:50]
-
-# print top_50
-
-weightedSum=0
-denom=0
-for i in range(0, len(top_50)):
-    weightedSum=weightedSum+(utilityMatrix[top_50[i]][userx]*simArray[top_50[i]])
-    multp=1
-    if utilityMatrix[top_50[i]][userx]==0:
-        multp=0
-    denom=denom+(simArray[top_50[i]]*multp)
-
-print "predicted rating : ", Decimal(weightedSum/denom)
-
-
-print("--- %s seconds ---" % (time.time() - start_time))
+    print("--- %s seconds ---" % (time.time() - start_time))
