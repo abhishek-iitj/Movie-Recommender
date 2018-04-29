@@ -42,10 +42,35 @@ with open (fname) as f:
         # print temp
         itemVec.append(temp)
 
+movieNameArray=[]
+movieNameArray.append("NULL")
+
+
+with open (fname) as f:
+    for line in f:
+        # print line
+        first=-1;
+        id=""
+        for x in range (0, len(line)):
+            if line[x]=='|':
+                first=x
+                break
+            else:
+                id=id+line[x]
+
+        name=""
+        for x in range (first+1, len(line)):
+            if line[x]=='|':
+                break
+            else:
+                name=name+line[x]
+        # print "id is \t", id, "name is \t", name
+        movieNameArray.append(name)
 # for x in range (0, len(itemVec)):
 #     print x, " -> ", itemVec[x]
 
 userx=input("\nEnter which user to suggest movies for : ")
+countx=input("\nHow Many Movies to suggest : ")
 
 
 fname="utility.txt"
@@ -114,9 +139,11 @@ for i in range(1, len(itemVec)):
 
 
 top_50 = [x for (y,x) in sorted(zip(similarityMeasure, item_index), key=lambda pair: pair[0], reverse=True)]
-top_50 = top_50[:50]
+top_50 = top_50[:countx]
 
-print "recommended top movies for you\n"
-print top_50
+print "\n\nrecommended top movies for you\n"
+# print top_50
+for i in range(0, len(top_50)):
+    print movieNameArray[top_50[i]]
 # print len(similarityMeasure)
 # print similarityMeasure
