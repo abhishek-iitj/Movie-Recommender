@@ -1,7 +1,7 @@
 import csv
 from decimal import Decimal
-
-
+from tabulate import tabulate
+# sudo apt-get install python-tabulate
 def similarity(ary1, ary2):
     sum1=0
     mag1=0
@@ -135,15 +135,28 @@ for i in range(1, len(itemVec)):
 similarityMeasure=[]
 for i in range(1, len(itemVec)):
     sim=similarity(itemVec[i], userProfile)
+    # print userProfile
     similarityMeasure.append(sim)
 
+#
+# top_50 = [x for (y,x) in sorted(zip(similarityMeasure, item_index), key=lambda pair: pair[0], reverse=True)]
+# print top_50
 
-top_50 = [x for (y,x) in sorted(zip(similarityMeasure, item_index), key=lambda pair: pair[0], reverse=True)]
-top_50 = top_50[:countx]
+top=[b[0] for b in sorted(enumerate(similarityMeasure),key=lambda i:i[1])]
+# print top
+top=top[::-1]
+top = top[:countx]
+# print top
 
 print "\n\nrecommended top movies for you\n"
 # print top_50
-for i in range(0, len(top_50)):
-    print movieNameArray[top_50[i]]
+myTable=[]
+for i in range(0, len(top)):
+    temp=[]
+    temp.append(movieNameArray[top[i]])
+    temp.append(similarityMeasure[top[i]])
+    myTable.append(temp)
+
+print tabulate(myTable, headers=['Name', 'Similarity'], tablefmt='orgtbl')
 # print len(similarityMeasure)
 # print similarityMeasure
